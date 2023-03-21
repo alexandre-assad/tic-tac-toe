@@ -84,16 +84,16 @@ class Grille:
         else:
             return False
 
-def ajout_partie(user,partie):
+def ajout_partie(user,partie,score):
     with open ("historique.json","r+") as fichier:
         data = json.load(fichier)
         is_user = 0
         for i in data["historique"]:
             if i["user"] == user:
-                i["partie"].append(f"Le Joueur {user} a joue une partie en mode {partie}")
+                i["partie"].append(f"Le Joueur {user} a joue une partie en mode {partie} et a {score}")
                 is_user = 1
         if is_user == 0:
-            data["historique"].append({"user":user,"partie":[f"Le Joueur {user} a joue une partie en mode {partie}"]})
+            data["historique"].append({"user":user,"partie":[f"Le Joueur {user} a joue une partie en mode {partie} et a {score}"]})
         fichier.seek(0)
         json.dump(data,fichier,indent=4)
         
@@ -163,8 +163,9 @@ while run:
                     else: 
                         user_text += event.unicode
         screen.fill((255,255,255))
-        
-        pygame.draw.rect(screen,(250,250,250),input_user)
+        screen_text = font.render("Nom d'utilisateur : ",True,(0,0,0))
+        screen.blit(screen_text, (180,180))
+        pygame.draw.rect(screen,(200,200,250),input_user)
         text_input = font.render(user_text, True, (0, 0, 0))
         screen.blit(text_input, (input_user.x+5, input_user.y+5))
         input_user.w = max(100, text_input.get_width()+10)
@@ -174,6 +175,7 @@ while run:
             if event.type == pygame.QUIT:
                 run = False
         game_grille.pos = [0,0,0,0,0,0,0,0,0]
+        game_grille.valeur = 1
         screen.fill((255,255,255))
         menu1v1_button.draw(1)
         menueasy_button.draw(2)
@@ -190,7 +192,7 @@ while run:
             Menu_button.draw(0)
             if ajout_historique == True:
                 ajout_historique = False
-                ajout_partie(user_player,"1v1")
+                ajout_partie(user_player,"1v1","gagne")
         elif game_grille.verif_win(2):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -201,7 +203,7 @@ while run:
             Menu_button.draw(0)
             if ajout_historique == True:
                 ajout_historique = False
-                ajout_partie(user_player,"1v1")
+                ajout_partie(user_player,"1v1","perdu")
         elif game_grille.verif_draw():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -212,7 +214,7 @@ while run:
             Menu_button.draw(0)
             if ajout_historique == True:
                 ajout_historique = False
-                ajout_partie(user_player,"1v1")
+                ajout_partie(user_player,"1v1","fait match nul")
         else:
             screen.fill((35,35,35))
             screen.blit(background, (0,0))
@@ -236,7 +238,7 @@ while run:
             Menu_button.draw(0)
             if ajout_historique == True:
                 ajout_historique = False
-                ajout_partie(user_player,"IA Simple")
+                ajout_partie(user_player,"IA Simple","gagne")
         elif game_grille.verif_win(2):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -247,7 +249,7 @@ while run:
             Menu_button.draw(0)
             if ajout_historique == True:
                 ajout_historique = False
-                ajout_partie(user_player,"IA Simple")
+                ajout_partie(user_player,"IA Simple","perdu")
         elif game_grille.verif_draw():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -258,7 +260,7 @@ while run:
             Menu_button.draw(0)
             if ajout_historique == True:
                 ajout_historique = False
-                ajout_partie(user_player,"IA Simple")
+                ajout_partie(user_player,"IA Simple","fait match nul")
         else:
             screen.fill((35,35,35))
             screen.blit(background, (0,0))
@@ -288,7 +290,7 @@ while run:
             Menu_button.draw(0)
             if ajout_historique == True:
                 ajout_historique = False
-                ajout_partie(user_player,"IA Dur")
+                ajout_partie(user_player,"IA Dur","fait match nul")
         elif game_grille.verif_win(1):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -299,7 +301,7 @@ while run:
             Menu_button.draw(0)
             if ajout_historique == True:
                 ajout_historique = False
-                ajout_partie(user_player,"IA Dur")
+                ajout_partie(user_player,"IA Dur","perdu")
         elif game_grille.verif_win(2):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -310,7 +312,7 @@ while run:
             Menu_button.draw(0)
             if ajout_historique == True:
                 ajout_historique = False
-                ajout_partie(user_player,"IA Dur")
+                ajout_partie(user_player,"IA Dur","gagne")
         else:
             screen.fill((35,35,35))
             screen.blit(background, (0,0))
