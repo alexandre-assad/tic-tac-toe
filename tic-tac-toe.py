@@ -1,6 +1,7 @@
 import pygame
 from dataclasses import *
-
+from ia import *
+import random
 class Button:
     def __init__(self,x,y,image):
         self.image = image
@@ -48,7 +49,7 @@ class Grille:
         for i in range(len(self.pos)):
             self.rec_pos.append(pygame.Rect(position_dans_grille(i),(50,50)))
             
-    def verif(self,valeur): #On fait les vérifications de victoires
+    def verif_win(self,valeur): #On fait les vérifications de victoires
         #Les lignes
         if self.pos[0]==self.pos[1] and self.pos[0]==self.pos[2] and self.pos[0]==valeur:
             return True
@@ -70,7 +71,16 @@ class Grille:
             return True
         else:
             return False
-
+        
+    def verif_draw(self):
+        compteur = 0
+        for i in self.pos:
+            if i == 0:
+                compteur += 1
+        if compteur == 0:
+            return True
+        else:
+            return False
 
 
 pygame.init()
@@ -105,7 +115,7 @@ def position_dans_grille(index):
         return (400,290)
 game_grille = Grille([0,0,0,0,0,0,0,0,0])
 game_grille.colision_grille()
-choix_menu = 0
+choix_menu = 3
 run = True
 while run:
     if choix_menu == 0 :
@@ -115,19 +125,26 @@ while run:
         screen.fill((255,255,255))
         menu1v1_button.draw()
     if choix_menu == 1:
-        if game_grille.verif(1):
+        if game_grille.verif_win(1):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
             screen.fill((255,255,255))
             text = font.render('La Croix a gagné', True, (255, 0, 0))
             screen.blit(text, (250, 182))
-        elif game_grille.verif(2):
+        elif game_grille.verif_win(2):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
             screen.fill((255,255,255))
             text = font.render('Le Cercle a gagné', True, (0, 0, 255))
+            screen.blit(text, (250, 182))
+        elif game_grille.verif_draw():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            screen.fill((255,255,255))
+            text = font.render('Egalité', True, (0, 0, 0))
             screen.blit(text, (250, 182))
         else:
             screen.fill((35,35,35))
@@ -136,6 +153,87 @@ while run:
                 if event.type == pygame.QUIT:
                     run = False
             game_grille.touch_case()
+            for i in range(len(game_grille.pos)):
+                if game_grille.pos[i] == 1:
+                    screen.blit(croixImg,position_dans_grille(i))
+                elif game_grille.pos[i] == 2:
+                    screen.blit(cercleImg,position_dans_grille(i))
+    elif choix_menu == 2:
+        if game_grille.verif_win(1):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            screen.fill((255,255,255))
+            text = font.render('La Joeur a gagné', True, (255, 0, 0))
+            screen.blit(text, (250, 182))
+        elif game_grille.verif_win(2):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            screen.fill((255,255,255))
+            text = font.render("L'IA a gagné", True, (0, 0, 255))
+            screen.blit(text, (250, 182))
+        elif game_grille.verif_draw():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            screen.fill((255,255,255))
+            text = font.render('Egalité', True, (0, 0, 0))
+            screen.blit(text, (250, 182))
+        else:
+            screen.fill((35,35,35))
+            screen.blit(background, (0,0))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            game_grille.touch_case()
+            if game_grille.valeur == 2:
+                if game_grille.verif_win(1) == False:
+                    if game_grille.verif_draw() == False:
+                        ia_simple(game_grille,2)
+                        game_grille.valeur = 1
+                
+            for i in range(len(game_grille.pos)):
+                if game_grille.pos[i] == 1:
+                    screen.blit(croixImg,position_dans_grille(i))
+                elif game_grille.pos[i] == 2:
+                    screen.blit(cercleImg,position_dans_grille(i))
+    elif choix_menu == 3:
+        if game_grille.verif_draw():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            screen.fill((255,255,255))
+            text = font.render('Egalité', True, (0, 0, 0))
+            screen.blit(text, (250, 182))
+        elif game_grille.verif_win(1):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            screen.fill((255,255,255))
+            text = font.render('La Joeur a gagné', True, (255, 0, 0))
+            screen.blit(text, (250, 182))
+        elif game_grille.verif_win(2):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            screen.fill((255,255,255))
+            text = font.render("L'IA a gagné", True, (0, 0, 255))
+            screen.blit(text, (250, 182))
+        else:
+            screen.fill((35,35,35))
+            screen.blit(background, (0,0))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+           
+            if game_grille.valeur == 1:
+                if game_grille.verif_draw() == False:
+                    ia_hard(game_grille,1)
+                    game_grille.valeur=2
+            game_grille.touch_case()        
+            
+            
             for i in range(len(game_grille.pos)):
                 if game_grille.pos[i] == 1:
                     screen.blit(croixImg,position_dans_grille(i))
