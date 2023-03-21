@@ -1,7 +1,7 @@
 import random
 from dataclasses import *
 import pygame
-
+import math
 @dataclass
 class Grille:
     pos:list[int] = field(default_factory=list)
@@ -23,7 +23,7 @@ class Grille:
                             self.valeur = 1
                     
             
-    def verif(self,valeur): #On fait les vérifications de victoires
+    def verif_win(self,valeur): #On fait les vérifications de victoires
         #Les lignes
         if self.pos[0]==self.pos[1] and self.pos[0]==self.pos[2] and self.pos[0]==valeur:
             return True
@@ -45,6 +45,16 @@ class Grille:
             return True
         else:
             return False
+        
+    def verif_draw(self):
+        compteur = 0
+        for i in self.pos:
+            if i == 0:
+                compteur += 1
+        if compteur == 0:
+            return True
+        else:
+            return False
 
 def ia_simple(grille,valeur):
     try:
@@ -63,48 +73,47 @@ def minimax(grille,profondeur,joueur):
         return -1
     elif grille.verif_draw() == True:
         return 0
-    elif profondeur == 0:
-        return 0
+    # elif profondeur == 0:
+    #     return 0
     
     #Minimax(grille,profondeur+1,joueuropposé)
-    if joueur == "joueur":
-        bestscore = 100
-        for i in range(9):
-            if grille.pos[i] == 0:
-                grille.pos[i] = 2
-                score = minimax(grille,profondeur-1,"ia")
-                grille.pos[i] = 0
-                score = min(score,bestscore)
-                return score
-        
-    else:
-        bestscore = -100
+    if joueur == "ia":
+        score:int
+        bestscore = -math.inf
         for i in range(9):
             if grille.pos[i] == 0:
                 grille.pos[i] = 1
-                score = minimax(grille,profondeur-1,"joueur")
+                score = minimax(grille,profondeur+1,"joueur")
                 grille.pos[i] = 0
-                score = max(score,bestscore)
-                return score
-    
+                bestscore = max(score,bestscore)
+                
+        
+        
+    else:
+        score:int
+        bestscore = math.inf
+        for i in range(9):
+            if grille.pos[i] == 0:
+                grille.pos[i] = 2
+                score = minimax(grille,profondeur+1,"ia")
+                grille.pos[i] = 0
+                bestscore = min(score,bestscore)
+    return bestscore
     
     
 def ia_hard(grille,valeur):
-    score :list[int]
-    meilleur_score = -10
+    score = -math.inf
+    meilleur_score = -math.inf
     meilleur_coup:int
     for i in range(9):
         if grille.pos[i] == 0:
             grille.pos[i] = valeur
-            score = minimax(grille,7,"ia")
+            score = minimax(grille,0,"joueur")
             grille.pos[i] = 0
             if score > meilleur_score:
-                
                 meilleur_score = score
                 meilleur_coup = i
-                print(meilleur_score, meilleur_coup)
     grille.pos[meilleur_coup] = valeur
     
 
-        
         
