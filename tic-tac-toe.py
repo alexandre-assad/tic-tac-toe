@@ -2,6 +2,8 @@ import pygame
 from dataclasses import *
 from ia import *
 import random
+import json
+
 class Button:
     def __init__(self,x,y,image):
         self.image = image
@@ -11,14 +13,14 @@ class Button:
 
         
         
-    def draw(self):
+    def draw(self,menu):
         global choix_menu
         global message
         pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(pos):
             if pygame.mouse.get_pressed()[0]:
                 if self.clicked == False:
-                    choix_menu = 1
+                    choix_menu = menu
         if pygame.mouse.get_pressed()[0] == 0:
             self.clicked = False
         screen.blit(self.image,(self.rect.x,self.rect.y))
@@ -82,18 +84,37 @@ class Grille:
         else:
             return False
 
-
+def ajout_partie(user,partie):
+    with open ("historique.json","r+") as fichier:
+        data = json.load(fichier)
+        is_user = 0
+        for i in data["historique"]:
+            if i["user"] == user:
+                i["partie"].append(f"Le Joueur {user} a joue une partie en mode {partie}")
+                is_user = 1
+        if is_user == 0:
+            data["historique"].append({"user":user,"partie":[f"Le Joueur {user} a joue une partie en mode {partie}"]})
+        fichier.seek(0)
+        json.dump(data,fichier,indent=4)
+        
+        
 pygame.init()
 
 screen = pygame.display.set_mode((600,400))
 background = pygame.image.load('backgroun.jpg')
-pygame.display.set_caption("Jeux de rôle")
+pygame.display.set_caption("Tic Tac Toe")
 font = pygame.font.Font('freesansbold.ttf',15)
 croixImg = pygame.image.load("croix.png").convert_alpha()
 cercleImg = pygame.image.load("cercle.png").convert_alpha()
 menu1v1Img = pygame.image.load("Bouton_menu1v1.png").convert_alpha()
 menu1v1_button = Button (30,100,menu1v1Img)
-
+menuimpoImg = pygame.image.load("Bouton_menuimpossible.png").convert_alpha()
+menuimpossible_button = Button (30, 300,menuimpoImg)
+menuezImg = pygame.image.load("Bouton_menuez.png").convert_alpha()
+menueasy_button = Button(30,200,menuezImg)
+menuImg = pygame.image.load("Bouton_menu.png").convert_alpha()
+Menu_button = Button(300,250,menuImg)
+input_user = pygame.Rect(200,200,140,32)
 def position_dans_grille(index):
     if index == 0:
         return (160,60)
@@ -115,15 +136,49 @@ def position_dans_grille(index):
         return (400,290)
 game_grille = Grille([0,0,0,0,0,0,0,0,0])
 game_grille.colision_grille()
-choix_menu = 3
+choix_menu = -1
 run = True
+input_active = False
+user_text = ""
+user_player = ""
+ajout_historique = True
 while run:
-    if choix_menu == 0 :
+    if choix_menu == -1 :
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if input_user.collidepoint(pygame.mouse.get_pos()):
+                    input_active = True
+                else:
+                    input_active = False
+            if input_active == True:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        user_text = user_text[:-1]
+                    elif event.key == pygame.K_RETURN:
+                        input_active = False
+                        user_player = user_text
+                        choix_menu = 0
+                    else: 
+                        user_text += event.unicode
         screen.fill((255,255,255))
-        menu1v1_button.draw()
+        
+        pygame.draw.rect(screen,(250,250,250),input_user)
+        text_input = font.render(user_text, True, (0, 0, 0))
+        screen.blit(text_input, (input_user.x+5, input_user.y+5))
+        input_user.w = max(100, text_input.get_width()+10)
+        game_grille.pos = [0,0,0,0,0,0,0,0,0]
+    elif choix_menu == 0 :
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        game_grille.pos = [0,0,0,0,0,0,0,0,0]
+        screen.fill((255,255,255))
+        menu1v1_button.draw(1)
+        menueasy_button.draw(2)
+        menuimpossible_button.draw(3)
+        ajout_historique = True
     if choix_menu == 1:
         if game_grille.verif_win(1):
             for event in pygame.event.get():
@@ -132,6 +187,10 @@ while run:
             screen.fill((255,255,255))
             text = font.render('La Croix a gagné', True, (255, 0, 0))
             screen.blit(text, (250, 182))
+            Menu_button.draw(0)
+            if ajout_historique == True:
+                ajout_historique = False
+                ajout_partie(user_player,"1v1")
         elif game_grille.verif_win(2):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -139,6 +198,10 @@ while run:
             screen.fill((255,255,255))
             text = font.render('Le Cercle a gagné', True, (0, 0, 255))
             screen.blit(text, (250, 182))
+            Menu_button.draw(0)
+            if ajout_historique == True:
+                ajout_historique = False
+                ajout_partie(user_player,"1v1")
         elif game_grille.verif_draw():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -146,6 +209,10 @@ while run:
             screen.fill((255,255,255))
             text = font.render('Egalité', True, (0, 0, 0))
             screen.blit(text, (250, 182))
+            Menu_button.draw(0)
+            if ajout_historique == True:
+                ajout_historique = False
+                ajout_partie(user_player,"1v1")
         else:
             screen.fill((35,35,35))
             screen.blit(background, (0,0))
@@ -166,6 +233,10 @@ while run:
             screen.fill((255,255,255))
             text = font.render('La Joeur a gagné', True, (255, 0, 0))
             screen.blit(text, (250, 182))
+            Menu_button.draw(0)
+            if ajout_historique == True:
+                ajout_historique = False
+                ajout_partie(user_player,"IA Simple")
         elif game_grille.verif_win(2):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -173,6 +244,10 @@ while run:
             screen.fill((255,255,255))
             text = font.render("L'IA a gagné", True, (0, 0, 255))
             screen.blit(text, (250, 182))
+            Menu_button.draw(0)
+            if ajout_historique == True:
+                ajout_historique = False
+                ajout_partie(user_player,"IA Simple")
         elif game_grille.verif_draw():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -180,6 +255,10 @@ while run:
             screen.fill((255,255,255))
             text = font.render('Egalité', True, (0, 0, 0))
             screen.blit(text, (250, 182))
+            Menu_button.draw(0)
+            if ajout_historique == True:
+                ajout_historique = False
+                ajout_partie(user_player,"IA Simple")
         else:
             screen.fill((35,35,35))
             screen.blit(background, (0,0))
@@ -206,20 +285,32 @@ while run:
             screen.fill((255,255,255))
             text = font.render('Egalité', True, (0, 0, 0))
             screen.blit(text, (250, 182))
+            Menu_button.draw(0)
+            if ajout_historique == True:
+                ajout_historique = False
+                ajout_partie(user_player,"IA Dur")
         elif game_grille.verif_win(1):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
             screen.fill((255,255,255))
-            text = font.render('La Joeur a gagné', True, (255, 0, 0))
+            text = font.render("L'Ia a gagné", True, (255, 0, 0))
             screen.blit(text, (250, 182))
+            Menu_button.draw(0)
+            if ajout_historique == True:
+                ajout_historique = False
+                ajout_partie(user_player,"IA Dur")
         elif game_grille.verif_win(2):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
             screen.fill((255,255,255))
-            text = font.render("L'IA a gagné", True, (0, 0, 255))
+            text = font.render("Le Joueur a gagné", True, (0, 0, 255))
             screen.blit(text, (250, 182))
+            Menu_button.draw(0)
+            if ajout_historique == True:
+                ajout_historique = False
+                ajout_partie(user_player,"IA Dur")
         else:
             screen.fill((35,35,35))
             screen.blit(background, (0,0))
