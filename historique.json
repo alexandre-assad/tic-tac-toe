@@ -11,7 +11,20 @@
             "partie": [
                 "Le Joueur yaya a joue une partie en mode IA Dur et a fait match nul",
                 "Le Joueur yaya a joue une partie en mode IA Dur et a fait match nul",
+                "Le Joueur yaya a joue une partie en mode IA Dur et a perdu",
+                "Le Joueur yaya a joue une partie en mode IA Dur et a perdu",
+                "Le Joueur yaya a joue une partie en mode IA Dur et a perdu",
+                "Le Joueur yaya a joue une partie en mode IA Dur et a perdu",
                 "Le Joueur yaya a joue une partie en mode IA Dur et a perdu"
+            ]
+        },
+        {
+            "user": "Jose",
+            "partie": [
+                "Le Joueur Jose a joue une partie en mode IA Dur et a perdu",
+                "Le Joueur Jose a joue une partie en mode IA Dur et a fait match nul",
+                "Le Joueur Jose a joue une partie en mode IA Simple et a gagne",
+                "Le Joueur Jose a joue une partie en mode 1v1 et a fait match nul"
             ]
         }
     ]
